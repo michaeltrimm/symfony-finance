@@ -13,7 +13,11 @@
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="/">Home <span class="sr-only">(current)</span></a></li>
+        <li class="{% if(app.request.attributes.get('_route') == "homepage") %}active{% endif %}"><a href="/">Home <span class="sr-only">(current)</span></a></li>
+        
+        {% if app.session.get('logged_in') %}
+          <li class="{% if(app.request.attributes.get('_route') != "homepage" and app.request.attributes.get('_route') != 'user_sign_in' and app.request.attributes.get('_route') != 'user_sign_up') %}active{% endif %}"><a href="/portfolio" title="Portfolio">Portfolio</a></li>
+        {% endif %}
       </ul>
       <ul class="nav navbar-nav navbar-right">
         {% if app.session.get('logged_in') %}

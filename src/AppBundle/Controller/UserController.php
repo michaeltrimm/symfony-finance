@@ -97,6 +97,11 @@ class UserController extends Controller
    */
   public function signupAction(Request $request)
   {
+    $session = $request->getSession();
+    if(true === $session->get('logged_in')){
+      $request->getSession()->getFlashBag()->add('warning',"Already signed in!");
+      return $this->redirectToRoute('homepage');
+    }
     return $this->render('user/sign_up.html.twig');
   }
   
@@ -106,6 +111,12 @@ class UserController extends Controller
    */
   public function signinAction(Request $request)
   {
+    $session = $request->getSession();
+    if(true === $session->get('logged_in')){
+      $request->getSession()->getFlashBag()->add('warning',"Already signed in!");
+      return $this->redirectToRoute('homepage');
+    }
+    
     return $this->render('user/sign_in.html.twig');
   }
   
