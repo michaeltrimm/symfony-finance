@@ -13,8 +13,20 @@
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Home <span class="sr-only">(current)</span></a></li>
+        <li class="active"><a href="/">Home <span class="sr-only">(current)</span></a></li>
       </ul>
+      <ul class="nav navbar-nav navbar-right">
+        {% if app.session.get('logged_in') %}
+        <p class="navbar-text">
+          Signed in as {{ app.session.get('email') }} (<a href="/user/sign_out" class="navbar-link">Sign Out</a>)
+        </p>
+        {% else %}
+          <li><a href="/user/sign_in">Sign In</a></li>
+          <li><a href="/user/sign_up">Sign Up</a></li>
+        {% endif %}
+        
+      </ul>
+      
     </div>
   </div>
 </nav>

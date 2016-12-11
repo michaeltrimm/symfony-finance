@@ -2,10 +2,72 @@
 
 {% block body %}
 <div class="container">
-  <h1>Sign In</h1>
-  <form name="sign_in" method="post" action="/user">
-    <input type="text" name="email" id="email">
-    <input type="submit" value="Sign In">
+  <h1 align="center">Sign In</h1>
+  <div class="alert alert-warning" id="error_block">
+    <i class="glyphicon glyphicon-exclamation-sign"></i> <span id="error_message"></span>
+  </div>
+  <form name="sign_in" id="sign_in_form" method="post" action="/user/createSession" class="form-horizontal">
+    <div class="form-group">
+      <label class="control-label col-md-2" for="email">Email Address</label>
+      <div class="col-md-10">
+        <input type="text" name="email" id="email" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-2" for="password">Password</label>
+      <div class="col-md-10">
+        <input type="password" name="password" id="password" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-10">
+        <input type="button" id="sign_in" value="Sign In" class="btn btn-lg btn-success">
+        <br><br>
+        <a href="/user/sign_up" title="Sign Up">Don't Have An Account? Sign Up</a>
+      </div>
   </form>
+  <script type="text/javascript">
+  $(function(){
+    var eb = $("#error_block");
+    eb.hide();
+    
+    function valid_email(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+    
+    function show_error(message){
+      eb.show();
+      $("#error_message").html(message);
+    }
+    
+    $("#sign_in").click(function(){
+      var email = $("#email").val();
+      if(email == ""){
+        show_error("No email address provided.");
+        return false;
+      }
+      if(!valid_email(email)){
+        show_error("Invalid email address provided.");
+        return false;
+      }
+      
+      var pass = $("#password").val();
+      if(pass == ""){
+        show_error("You must apply a password.");
+        return false;
+      }
+      
+      if(pass.length < 6){
+        show_error("Insufficient password strength. Password must be at least 6 characters!");
+        return false;
+      }
+      
+      eb.hide();
+      form = $("#sign_in_form");
+      form.get(0).submit();
+    });
+  });
+  </script>
 </div>
 {% endblock %}
