@@ -1,6 +1,154 @@
 {% extends "base.html.twig" %}
 {% block body %}
   <div class="container">
-    <h1>My Portfolio</h1>
+    <p class="col-md-12">
+      <h1>My Portfolio 
+        <small>
+          <div class="pull-right">
+            <a href="/portfolio/new" title="Add To Portfolio" class="btn btn-default">Add Investment</a>
+          </div>
+        </small>
+      </h1>
+    </p>
+    <table class="table table-bordered table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Quantity</th>
+          <th>Total Invested<span class="pull-right">Unit Cost</span></th>
+          <th>Latest Price</th>
+          <th>Value<span class="pull-right">Performance</span></th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.symbol }}</td>
+            <td><span class="{{ item.symbol }} td_quantity">{{ item.quantity|number_format(0, '.', ',') }}</span></td>
+            <td>
+              ${{ (item.pricepaid * item.quantity)|number_format(2, '.', ',') }}
+              <span class="pull-right">
+                ea $<span class="{{ item.symbol }} td_paid">{{ item.pricepaid|number_format(2, '.', ',') }}</span>
+              </span>
+            </td>
+            <td><abbr class="{{ item.symbol }} td_price">loading</abbr></td>
+            <td><abbr class="{{ item.symbol }} td_value">loading</abbr> <span class="{{ item.symbol }} gain badge pull-right"></span></td>
+            <td align="right" width="1%" nowrap="nowrap">
+              <a href="/portfolio/{{ item.id }}/delete" title="Delete {{ item.symbol }}" class="btn btn-xs btn-danger">
+                <i class="glyphicon glyphicon-trash"></i> Delete
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="5"><span class="pull-right">Investment Cost</span></th>
+          <th><span id="total_cost_paid">$0.00</span></th>
+        </tr>
+        <tr>
+          <th colspan="5"><span class="pull-right">Market Value</span></th>
+          <th><span id="total_value">$0.00<span></th>
+        </tr>
+        <tr>
+          <th colspan="5"><span class="pull-right">Performance</span></th>
+          <th><span id="total_gain" class="badge">$0.00<span></th>
+        </tr>
+      </tfoot>
+    </table>
+    <script type="text/javascript">
+    var symbols = [ {% for symbol in symbols %}'{{ symbol }}', {% endfor %} ];
+    var total_value = 0;
+    var total_shares = 0;
+    var total_cost = 0;
+    var total_gain = 0;
+
+    // Load All Symbols Price Data
+    for(i=0;i<=symbols.length-1;i++){
+      getQuote(symbols[i]);
+    }
+
+    function addCommas(str){
+
+      var parts = (str + "").split("."),
+          main = parts[0],
+          len = main.length,
+          output = "",
+          i = len - 1;
+
+      while(i >= 0) {
+        output = main.charAt(i) + output;
+        if ((len - i) % 3 === 0 && i > 0) {
+            output = "," + output;
+        }
+        --i;
+      }
+
+      if (parts.length > 1) {
+        output += "." + parts[1].substring(0,2);
+      }
+
+      return output;
+
+    }
+
+
+    function respondToQuote(symbol, quote){
+      var td_price = $("abbr."+symbol+".td_price");
+      var td_value = $("abbr."+symbol+".td_value");
+      var price = parseFloat($("span."+symbol+".td_paid").html());
+      var quantity = parseFloat($("span."+symbol+".td_quantity").html());
+      var value = quote*quantity;
+      var cost = price*quantity;
+      var gain = value - cost;
+      
+      var badge_gain = $("span."+symbol+".gain.badge");
+      badge_gain.removeClass("badge_success").removeClass("badge-danger");
+      if(gain < 0){
+        badge_gain.html("$("+addCommas(Math.abs(gain))+")");
+        badge_gain.addClass("badge-danger");
+      } else {
+        badge_gain.html("$"+addCommas(Math.abs(gain)));
+        badge_gain.addClass("badge-success");
+      }
+
+      td_price.html("$"+quote);
+      td_value.html("$"+addCommas(quote*quantity));
+      td_price.attr('title','Last Updated '+Date());
+      td_value.attr('title','Last Updated '+Date());
+      
+      total_value += parseFloat(value);
+      total_cost += cost;
+      total_shares += parseFloat(quantity);
+      total_gain += gain;
+
+      $("#total_cost_paid").html("$"+addCommas(total_cost));
+      $("#total_value").html("$"+addCommas(total_value));
+      $("#total_shares_owned").html(total_shares);
+      $("#total_gain").html("$"+addCommas(total_gain));
+      if(total_gain > 0){
+        $("#total_gain").removeClass("badge-success").removeClass("badge-danger").addClass("badge-success");
+      } else {
+        $("#total_gain").removeClass("badge-success").removeClass("badge-danger").addClass("badge-danger");
+      }
+
+    }
+    
+    function getQuote(symbol,keyName){
+      keyName = typeof keyName !== 'undefined' ? keyName : "LastTradePriceOnly";
+      $.getJSON("https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%3D%22"+symbol+"%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys", function(result) {
+        try {
+          quote = eval("result.query.results.quote."+keyName);
+          respondToQuote(symbol, quote);
+        } catch(err){
+          console.log(err);
+        }
+      }).fail(function() {
+          alert("Unable to find price for "+ symbol);
+      });
+    }
+    
+    </script>
   </div>
 {% endblock %}

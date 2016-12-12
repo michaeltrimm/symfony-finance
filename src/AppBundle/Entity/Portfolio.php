@@ -52,14 +52,14 @@ class Portfolio
     /**
      * @var string
      *
-     * @ORM\Column(name="last_price", type="decimal", precision=10, scale=2)
+     * @ORM\Column(name="last_price", type="decimal", precision=10, scale=2, nullable=true)
      */
     private $lastPrice;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="last_price_updated_on", type="datetimetz")
+     * @ORM\Column(name="last_price_updated_on", type="datetimetz", nullable=true)
      */
     private $lastPriceUpdatedOn;
 

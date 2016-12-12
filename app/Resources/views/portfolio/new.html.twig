@@ -1,0 +1,73 @@
+{% extends "base.html.twig" %}
+{% block body %}
+  <div class="container">
+    <p class="col-md-12">
+      <h1>My Portfolio <small>Adding Investment</small></h1>
+    </p>
+    <div class="alert alert-warning" id="error_block">
+      <i class="glyphicon glyphicon-exclamation-sign"></i> <span id="error_message"></span>
+    </div>
+    <form name="portfolio_new" id="portfolio_new" method="post" action="/portfolio/create" class="form-horizontal">
+      <div class="form-group">
+        <label class="control-label col-md-2" for="symbol">Investment Symbol</label>
+        <div class="col-md-10">
+          <input type="text" name="symbol" id="symbol" required class="form-control" placeholder="e.g. AAPL">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-2" for="price">Price Paid</label>
+        <div class="col-md-10">
+          <input type="text" name="price" id="price" required class="form-control" min="0" placeholder="e.g. 100.52">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-2" for="quantity">Quantity Purchased</label>
+        <div class="col-md-10">
+          <input type="number" name="quantity" id="quantity" required value="1" min="0" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+          <input type="button" id="add_button" value="Add Investment" class="btn btn-success">
+        </div>
+      </div>
+    </form>
+    <script type="text/javascript">
+    $(function(){
+      var eb = $("#error_block");
+      eb.hide();
+    
+      function show_error(message){
+        eb.show();
+        $("#error_message").html(message);
+      }
+      
+      $("#add_button").click(function(){
+        var symbol = $("#symbol").val();
+        var price = $("#price").val();
+        var quantity = $("#quantity").val();
+        
+        if(symbol == ""){
+          show_error("Invalid symbol");
+          return false;
+        }
+        
+        if(price == "" || parseFloat(price) < 0.0){
+          show_error("Invalid price");
+          return false;
+        }
+        
+        if(quantity == "" || parseInt(quantity) <= 0){
+          show_error("Invalid quantity");
+          return false;
+        }
+        
+        var f = $("#portfolio_new");
+        f.get(0).submit();
+        
+      });
+      
+    });
+    </script>
+  </div>
+{% endblock %}
