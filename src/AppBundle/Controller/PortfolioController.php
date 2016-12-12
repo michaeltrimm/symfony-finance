@@ -157,6 +157,72 @@ class PortfolioController extends Controller
   }
 
   /**
+   * @Route("/portfolio/{id}/show", requirements={"id" = "\d+"})
+   * @Method({"GET","HEAD"})
+   */
+  public function showAction(Request $request, $id=null)
+  {
+    // Symfony Objects
+    $session = $request->getSession();
+
+    // Require Current User
+    $this->requireLoggedIn($session);
+
+    // Placeholder for any possible error message
+    $err = false;
+
+    // Load Symfony Doctrine
+    $em = $this->getDoctrine()->getManager();
+
+    // Define Doctrine Table Entries
+    $users_table = $this->getDoctrine()->getRepository('AppBundle:User');
+    $portfolios_table = $this->getDoctrine()->getRepository('AppBundle:Portfolio');
+
+    // Fetch The User Entity
+    $user = $users_table->findOneByEmail($session->get('email'));
+
+    // Verify User Entity Exists
+    if(!$user){
+      // Unable to find account!
+      return $this->noSuchAccount($session);
+    }
+
+    // Validate Integrity Of id Parameter
+    if(is_null($id) || intval($id) < 1){
+      $session->getFlashBag()->add('error',"Invalid ID provided!");
+      return $this->redirectToRoute('portfolio_index');
+    }
+
+    // Fetch The Portfolio Entity
+    $item = $portfolios_table->find($id);
+
+    // Verify Entity Exists
+    if(!$item){
+
+      // No Such Item Found
+      $session->getFlashBag()->add('error',"Invalid ID provided!");
+      return $this->redirectToRoute('portfolio_index');
+
+    } else {
+
+      // Entity Found, Verify Access
+      if($item->getUserId() != $user->getId()){
+
+        // Access Denied, Redirect With Error To Portfolio Index
+        $session->getFlashBag()->add('error',"Permission Denied!");
+        return $this->redirectToRoute('portfolio_index');
+
+      }
+
+    }
+
+    return $this->render("portfolio/show.html.twig", [
+      "item" => $item
+    ]);
+
+  }
+
+  /**
    * @Route("/portfolio/{id}/delete", requirements={"id" = "\d+"})
    * @Method({"GET","HEAD"})
    */

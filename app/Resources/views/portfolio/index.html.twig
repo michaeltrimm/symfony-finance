@@ -24,7 +24,7 @@
       <tbody>
         {% for item in items %}
           <tr>
-            <td>{{ item.symbol }}</td>
+            <td><a href="/portfolio/{{ item.id }}/show">{{ item.symbol }}</a></td>
             <td><span class="{{ item.symbol }} td_quantity">{{ item.quantity|number_format(0, '.', ',') }}</span></td>
             <td>
               ${{ (item.pricepaid * item.quantity)|number_format(2, '.', ',') }}

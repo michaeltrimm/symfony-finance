@@ -1,0 +1,68 @@
+{% extends "base.html.twig" %}
+{% block body %}
+  <div class="container">
+    <p class="col-md-12">
+      <h1>My Portfolio <small>Viewing {{ item.symbol }}</small></h1>
+      <div id="container"></div>
+    </p>
+    <script type="text/javascript" src="http://code.highcharts.com/stock/highstock.js"></script>
+    <script type="text/javascript">
+    $(function(){
+      paintChart("{{ item.symbol }}");
+      
+      function paintChart(symbol){
+        var chart_url = "http://real-chart.finance.yahoo.com/table.csv?s=";
+        var two_years_ago = (new Date()).getFullYear()-2;
+        $.getJSON(
+          "https://query.yahooapis.com/v1/public/yql?q=" +
+          encodeURIComponent(
+              "select Date, Open, High, Low, Close from csv where url='"+chart_url+symbol +
+              "&a=0&b=1&c="+two_years_ago+"&ignore=.csv' and columns='Date,Open,High,Low,Close,Volume,Adj Close'"
+          ) +
+          "&format=json&callback=?", function (data) {
+
+                  console.log(data.query.results);
+                  data = data.query.results.row;
+                  data = data.splice(1, data.length);
+                  console.log(data);
+
+                  var processedData = [];
+                  $(data).each(function(index, value) {
+                      // console.log(Date.parse(value.Date).getTime());
+                      // console.log(Date.parse(value.Date));
+                      processedData.push([
+                        Date.parse(value.Date), 
+                        parseFloat(value.Open), 
+                        parseFloat(value.High), 
+                        parseFloat(value.Low), 
+                        parseFloat(value.Close)
+                      ]);
+                  });
+                  processedData = processedData.reverse();
+                  console.log(processedData);
+
+                  // Create the chart
+                  $('#container').highcharts('StockChart', {
+                      rangeSelector : {
+                          selected : 1
+                      },
+                      title : {
+                          text : symbol.toUpperCase()+' Stock Price'
+                      },
+                      series : [{
+                          name : symbol.toUpperCase()+' Stock Price',
+                          data : processedData,
+                          color: '#e88919',
+                          id: 'price',
+                          tooltip: {
+                              valueDecimals: 2
+                          }
+                      }]
+                  });
+              });
+      }
+      
+    });
+    </script>
+  </div>
+{% endblock %}
